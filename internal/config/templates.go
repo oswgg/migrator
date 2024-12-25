@@ -1,6 +1,6 @@
 package config
 
-const MigratorRCFile = `config_folder_path=config1/config`
+const MigratorRCFile = `config_folder_path=config/`
 
 const ConfigFile = `development:
 	username: root
