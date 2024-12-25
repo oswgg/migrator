@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/oswgg/migrator/internal/tools"
+	"github.com/oswgg/migrator/pkg/tools"
 	"os"
 	"path/filepath"
 )
@@ -10,6 +10,7 @@ import (
 const (
 	migratorRCFileName = ".migratorrc"
 	configYamlFileName = "config.yaml"
+	filePerm           = 0644
 	dirPerm            = 0755
 )
 
@@ -26,7 +27,7 @@ func InitializeConfigurationFiles() error {
 	}
 
 	// Create .migratorrc
-	if err = tools.WriteFile(migratorRCFileName, configTemplates[migratorRCFileName]); err != nil {
+	if err = tools.WriteFile(migratorRCFileName, configTemplates[migratorRCFileName], filePerm); err != nil {
 		return fmt.Errorf("error writing %s file: %w", migratorRCFileName, err)
 	}
 
@@ -58,7 +59,7 @@ func InitializeConfigurationFiles() error {
 		}
 
 		filePath := filepath.Join(configFolderPath, filename)
-		if err = tools.WriteFile(filePath, template); err != nil {
+		if err = tools.WriteFile(filePath, template, filePerm); err != nil {
 			return fmt.Errorf("error writing %s file: %w", filename, err)
 		}
 	}
