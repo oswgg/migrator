@@ -1,16 +1,17 @@
 package config
 
 import (
-	"github.com/oswgg/migrator/internal/database"
+	"fmt"
 	"github.com/oswgg/migrator/pkg/tools"
 	"gopkg.in/yaml.v3"
 	"path"
+	"strings"
 )
 
 const (
-	Develop = "dev"
-	Prod    = "prod"
-	Test    = "test"
+	Development = "dev"
+	Production  = "prod"
+	Test        = "test"
 )
 
 type DatabaseConfig struct {
@@ -43,7 +44,7 @@ func GetUserTxTConfig() (*UserMigratorRCConfig, error) {
 	}, nil
 }
 
-func GetUserYAMLConfig(env string) (*database.DatabaseCredentials, error) {
+func GetUserYAMLConfig(env string) (*DatabaseConfig, error) {
 	var err error
 	var userTxtConfigs *UserMigratorRCConfig
 
@@ -64,28 +65,40 @@ func GetUserYAMLConfig(env string) (*database.DatabaseCredentials, error) {
 		return nil, err
 	}
 
+	var dbConfig *DatabaseConfig
 	switch env {
-	case Develop:
-		return &database.DatabaseCredentials{
-			Host:     userConfig.Development.Host,
-			Port:     userConfig.Development.Port,
-			Username: userConfig.Development.Username,
-			Password: userConfig.Development.Password,
-			Database: userConfig.Development.Database,
-			Dialect:  userConfig.Development.Dialect,
-		}, nil
-
-	case Prod:
-		return &database.DatabaseCredentials{
-			Host:     userConfig.Production.Host,
-			Port:     userConfig.Production.Port,
-			Username: userConfig.Production.Username,
-			Password: userConfig.Production.Password,
-			Database: userConfig.Production.Database,
-			Dialect:  userConfig.Production.Dialect,
-		}, nil
-
+	case Development:
+		dbConfig = &userConfig.Development
+	case Production:
+		dbConfig = &userConfig.Production
+	case Test:
+		dbConfig = &userConfig.Test
+	default:
+		return nil, fmt.Errorf("invalid environment: %s", env)
 	}
 
-	return nil, err
+	expandedConfig := &DatabaseConfig{}
+	fields := []struct {
+		src  string
+		dest *string
+	}{
+		{dbConfig.Username, &expandedConfig.Host},
+		{dbConfig.Password, &expandedConfig.Port},
+		{dbConfig.Host, &expandedConfig.Username},
+		{dbConfig.Port, &expandedConfig.Password},
+		{dbConfig.Database, &expandedConfig.Database},
+		{dbConfig.Dialect, &expandedConfig.Dialect},
+	}
+
+	for _, field := range fields {
+		if !strings.Contains(field.src, "$") {
+			*field.dest = field.src
+			continue
+		}
+		if *field.dest, err = tools.ExpandEnvVar(field.src); err != nil {
+			return nil, fmt.Errorf("failed to expand environment variable: %w", err)
+		}
+	}
+
+	return expandedConfig, nil
 }
