@@ -17,6 +17,7 @@ type DatabaseImpl interface {
 }
 
 func NewDatabaseImpl(credentials *config.DatabaseConfig) (DatabaseImpl, error) {
+	fmt.Println(credentials)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", credentials.Username, credentials.Password, credentials.Host, credentials.Database)
 
 	connection, err := sql.Open("mysql", dsn)

@@ -82,10 +82,10 @@ func GetUserYAMLConfig(env string) (*DatabaseConfig, error) {
 		src  string
 		dest *string
 	}{
-		{dbConfig.Username, &expandedConfig.Host},
-		{dbConfig.Password, &expandedConfig.Port},
-		{dbConfig.Host, &expandedConfig.Username},
-		{dbConfig.Port, &expandedConfig.Password},
+		{dbConfig.Username, &expandedConfig.Username},
+		{dbConfig.Password, &expandedConfig.Password},
+		{dbConfig.Host, &expandedConfig.Host},
+		{dbConfig.Port, &expandedConfig.Port},
 		{dbConfig.Database, &expandedConfig.Database},
 		{dbConfig.Dialect, &expandedConfig.Dialect},
 	}
