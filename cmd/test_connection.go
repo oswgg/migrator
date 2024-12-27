@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
 	"github.com/spf13/cobra"
@@ -13,24 +14,23 @@ var testConnectionCmd = &cobra.Command{
 	Aliases: []string{"test"},
 	Short:   "Test connection",
 	Long:    "Test database connection with the preset config files",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 
 		databaseCredentials, err := config.GetUserYAMLConfig(environment)
 		if err != nil {
-			return err
+			fmt.Println("Error:", err)
 		}
 
 		db, err := database.NewDatabaseImpl(databaseCredentials)
 		if err != nil {
-			return err
+			fmt.Println("Error:", err)
 		}
 
 		err = db.TestConnection()
 		if err != nil {
-			return err
+			fmt.Println("Error:", err)
 		}
 
-		return nil
 	},
 }
 

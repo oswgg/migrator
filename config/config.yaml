@@ -1,9 +1,4 @@
-package config
-
-const MigratorRCFile = `config_folder_path=config/
-migrations_folder_path=migrations/`
-
-const ConfigFile = `development:
+development:
 	username: root
 	password: root
 	database: database
@@ -24,4 +19,3 @@ test:
 	host: $TEST_HOST
 	port: $TEST_PORT
 	dialect: $TEST_DIALECT
-`

@@ -6,6 +6,7 @@ import (
 	"github.com/oswgg/migrator/internal/database/migrations"
 	"github.com/oswgg/migrator/pkg/tools"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var name string
@@ -16,12 +17,13 @@ var createCmd = &cobra.Command{
 	Short: "Create a new migration",
 	Long:  "Create a new migration files for up and down",
 	Args:  cobra.MinimumNArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 
 		userTxtConfigs, err := tools.GetTxtValues(config.MigratorRCFileName)
 		if err != nil {
-			return err
+			fmt.Println("Error:", err)
+			os.Exit(0)
 		}
 
 		migrationsFolderPath := userTxtConfigs["migrations_folder_path"]
@@ -29,12 +31,11 @@ var createCmd = &cobra.Command{
 		fileGenerator := migrations.NewFileGenerator(migrationsFolderPath)
 		successText, err := fileGenerator.CreateMigration(name, description)
 		if err != nil {
-			return err
+			fmt.Println("Error:", err)
+			os.Exit(0)
 		}
 
 		fmt.Printf(successText)
-
-		return nil
 	},
 }
 

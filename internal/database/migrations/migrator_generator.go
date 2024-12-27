@@ -12,7 +12,7 @@ import (
 
 var (
 	TemplateMigration = func(desc string) string {
-		return fmt.Sprintf(`//%s`, desc)
+		return fmt.Sprintf(`// %s`, desc)
 	}
 )
 
@@ -44,11 +44,9 @@ func (f *FileGenerator) CreateMigration(name string, description string) (string
 		return "", errors.New("migration already exists")
 	}
 
-	fmt.Println(description)
-
 	template := TemplateMigration(description)
 
-	err := tools.WriteFile(filePath, template, config.FilePerm)
+	err := os.WriteFile(filePath, []byte(template), config.FilePerm)
 	if err != nil {
 		return fmt.Sprintf("Error generating migration: %s", name), err
 	}
