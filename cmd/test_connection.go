@@ -19,6 +19,7 @@ var testConnectionCmd = &cobra.Command{
 		databaseCredentials, err := config.GetUserYAMLConfig(environment)
 		if err != nil {
 			fmt.Println("Error:", err)
+
 		}
 
 		db, err := database.NewDatabaseImpl(databaseCredentials)
