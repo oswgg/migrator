@@ -1,12 +1,17 @@
 package tools
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
 
 func GetTxtValues(path string) (map[string]string, error) {
 	var mappedValues = map[string]string{}
+
+	if !FileExists(path) {
+		return nil, fmt.Errorf("file %s does not exist", path)
+	}
 
 	data, err := os.ReadFile(path)
 	if err != nil {

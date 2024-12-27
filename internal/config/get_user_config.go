@@ -34,7 +34,7 @@ type UserYAMLConfig struct {
 }
 
 func GetUserTxTConfig() (*UserMigratorRCConfig, error) {
-	txtValues, err := tools.GetTxtValues(migratorRCFileName)
+	txtValues, err := tools.GetTxtValues(MigratorRCFileName)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func GetUserYAMLConfig(env string) (*DatabaseConfig, error) {
 
 	userConfig := UserYAMLConfig{}
 
-	yamlContent, err := tools.ReadFile(path.Join(userTxtConfigs.ConfigFolderPath, configYamlFileName))
+	yamlContent, err := tools.ReadFile(path.Join(userTxtConfigs.ConfigFolderPath, ConfigYamlFileName))
 	if err != nil {
 		return nil, err
 	}

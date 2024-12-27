@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var initCmd = &cobra.Command{
@@ -10,13 +12,14 @@ var initCmd = &cobra.Command{
 	Short: "Init the migrator options file",
 	Long:  "Create a file .migratorrc that contains all the database options required",
 	Args:  cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		err := config.InitializeConfigurationFiles()
 		if err != nil {
-			return err
+			fmt.Println("Error:", err)
+			os.Exit(0)
 		}
 
-		return nil
+		fmt.Println("File .migratorrc initialized")
 	},
 }
 
