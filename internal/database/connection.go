@@ -4,20 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/oswgg/migrator/internal/config"
 )
 
-type DatabaseCredentials struct {
-	Host       string
-	Port       string
-	Username   string
-	Password   string
-	Database   string
-	Dialect    string
-	DriverName string
-}
-
 type Database struct {
-	DatabaseCredentials
+	config.DatabaseConfig
 	connection *sql.DB
 }
 
@@ -25,7 +16,7 @@ type DatabaseImpl interface {
 	TestConnection() error
 }
 
-func NewDatabaseImpl(credentials *DatabaseCredentials) (DatabaseImpl, error) {
+func NewDatabaseImpl(credentials *config.DatabaseConfig) (DatabaseImpl, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", credentials.Username, credentials.Password, credentials.Host, credentials.Database)
 
 	connection, err := sql.Open("mysql", dsn)
@@ -34,8 +25,8 @@ func NewDatabaseImpl(credentials *DatabaseCredentials) (DatabaseImpl, error) {
 	}
 
 	return &Database{
-		DatabaseCredentials: *credentials,
-		connection:          connection,
+		DatabaseConfig: *credentials,
+		connection:     connection,
 	}, nil
 }
 

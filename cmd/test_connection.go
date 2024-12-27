@@ -20,12 +20,12 @@ var testConnectionCmd = &cobra.Command{
 			return err
 		}
 
-		connection, err := database.NewDatabaseImpl(databaseCredentials)
+		db, err := database.NewDatabaseImpl(databaseCredentials)
 		if err != nil {
 			return err
 		}
 
-		err = connection.TestConnection()
+		err = db.TestConnection()
 		if err != nil {
 			return err
 		}
