@@ -27,7 +27,7 @@ func InitializeConfigurationFiles() error {
 	}
 
 	// Create .migratorrc
-	if err = tools.WriteFile(MigratorRCFileName, configTemplates[MigratorRCFileName], FilePerm); err != nil {
+	if err = tools.CreateAndWriteFile(MigratorRCFileName, configTemplates[MigratorRCFileName], FilePerm); err != nil {
 		return fmt.Errorf("error writing %s file: %w", MigratorRCFileName, err)
 	}
 
@@ -59,7 +59,7 @@ func InitializeConfigurationFiles() error {
 		}
 
 		filePath := filepath.Join(configFolderPath, filename)
-		if err = tools.WriteFile(filePath, template, FilePerm); err != nil {
+		if err = tools.CreateAndWriteFile(filePath, template, FilePerm); err != nil {
 			return fmt.Errorf("error writing %s file: %w", filename, err)
 		}
 	}

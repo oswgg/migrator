@@ -22,6 +22,10 @@ func ReadFile(path string) ([]byte, error) {
 	return os.ReadFile(path)
 }
 
-func WriteFile(filePath, content string, perm os.FileMode) error {
+func CreateAndWriteFile(filePath, content string, perm os.FileMode) error {
+	if FileExists(filePath) {
+		return fmt.Errorf("file already exists: %s", filePath)
+	}
+
 	return os.WriteFile(filePath, []byte(content), perm)
 }
