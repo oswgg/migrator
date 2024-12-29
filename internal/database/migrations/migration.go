@@ -3,6 +3,7 @@ package migrations
 import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/config"
+	"github.com/oswgg/migrator/internal/database"
 	"github.com/oswgg/migrator/pkg/tools"
 	"os"
 	"path"
@@ -16,6 +17,7 @@ const (
 )
 
 type Migrator struct {
+	Env               string
 	Specific          bool
 	SpecificMigration string
 	MigrationType     MigrationType
@@ -29,8 +31,8 @@ type Migration struct {
 }
 
 type MigrationRunner interface {
-	Up()
-	Down()
+	Up() error
+	Down() error
 }
 
 func getMigrations(options *Migrator) ([]Migration, error) {
@@ -92,17 +94,51 @@ func NewMigrator(options *Migrator) (MigrationRunner, error) {
 		MigrationType:     options.MigrationType,
 		From:              options.From,
 		To:                options.To,
+		Env:               options.Env,
 		Migrations:        migrations,
 	}, nil
 }
 
-func (m *Migrator) Up() {
+func (m *Migrator) Up() error {
+	configurations, err := config.GetUserYAMLConfig(m.Env)
+	if err != nil {
+		return err
+	}
 
-	fmt.Printf("Up from %v", m.From)
-	fmt.Printf("Up to %v", m.To)
+	database, err := database.NewDatabaseImpl(configurations)
+	if err != nil {
+		return err
+	}
+
+	migrationsTableExists, err := database.VerifyTableExists(configurations.MigrationsTableName)
+	if err != nil {
+		return err
+	}
+	if !migrationsTableExists {
+		err := database.CreateMigrationsTable()
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, migration := range m.Migrations {
+		fmt.Printf("========= Migrating: %s =========\n", migration.path)
+		readFile, err := tools.ReadFile(migration.path)
+		if err != nil {
+			return err
+		}
+		err = database.ExecMigrationFileContent(string(readFile), migration.path)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("========= Migrating: %s =========\n", migration.path)
+	}
+	return nil
 }
 
-func (m *Migrator) Down() {
+func (m *Migrator) Down() error {
 	fmt.Printf("Down from %v", m.From)
 	fmt.Printf("Down to %v", m.To)
+
+	return nil
 }
