@@ -15,12 +15,13 @@ const (
 )
 
 type DatabaseConfig struct {
-	Host     string `yaml:"host"`
-	Port     string `yaml:"port"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Database string `yaml:"database"`
-	Dialect  string `yaml:"dialect"`
+	Host                string `yaml:"host"`
+	Port                string `yaml:"port"`
+	Username            string `yaml:"username"`
+	Password            string `yaml:"password"`
+	Database            string `yaml:"database"`
+	MigrationsTableName string `yaml:"migrations_table"`
+	Dialect             string `yaml:"dialect"`
 }
 
 type UserMigratorRCConfig struct {
@@ -87,6 +88,7 @@ func GetUserYAMLConfig(env string) (*DatabaseConfig, error) {
 		{dbConfig.Host, &expandedConfig.Host},
 		{dbConfig.Port, &expandedConfig.Port},
 		{dbConfig.Database, &expandedConfig.Database},
+		{dbConfig.MigrationsTableName, &expandedConfig.MigrationsTableName},
 		{dbConfig.Dialect, &expandedConfig.Dialect},
 	}
 
