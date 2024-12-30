@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/database/migrations"
+	types "github.com/oswgg/migrator/internal/types"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -14,37 +15,37 @@ var env string
 
 var migrateCmd = &cobra.Command{
 	Use:   "migrate [up|down]",
-	Short: "Run migrations",
-	Long:  `Run migrations.`,
+	Short: "Run types",
+	Long:  `Run types.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var upDownFlag = args[0]
-		var upDownValue migrations.MigrationType
+		var upDownValue types.MigrationType
 
 		var isSpecific = false
 		var migrationName string
-		var migratorValues *migrations.Migrator
+		var migratorValues *types.Migrator
 
 		if specificMigration != "" {
 			isSpecific = true
 			migrationName = specificMigration
 		}
 
-		if upDownFlag == string(migrations.MigrationUp) {
-			upDownValue = migrations.MigrationUp
+		if upDownFlag == string(types.MigrationUp) {
+			upDownValue = types.MigrationUp
 		} else {
-			upDownValue = migrations.MigrationDown
+			upDownValue = types.MigrationDown
 		}
 
 		if isSpecific {
-			migratorValues = &migrations.Migrator{
+			migratorValues = &types.Migrator{
 				Specific:          isSpecific,
 				SpecificMigration: migrationName,
 				MigrationType:     upDownValue,
 				Env:               env,
 			}
 		} else {
-			migratorValues = &migrations.Migrator{
+			migratorValues = &types.Migrator{
 				From:          fromMigration,
 				To:            toMigration,
 				MigrationType: upDownValue,
@@ -58,7 +59,7 @@ var migrateCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		if upDownValue == migrations.MigrationUp {
+		if upDownValue == types.MigrationUp {
 			err := migrator.Up()
 			if err != nil {
 				fmt.Printf("Error: %v", err)
