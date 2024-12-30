@@ -71,7 +71,7 @@ func (m *Migrator) Up() error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("========= Migrating: %s =========\n", migration.Name)
+		fmt.Printf("========= Migrated: %s =========\n\n", migration.Name)
 	}
 	return nil
 }

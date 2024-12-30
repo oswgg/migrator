@@ -55,6 +55,7 @@ func GetMigrations(options *types.Migrator) ([]types.Migration, error) {
 		if !Contains(executedMigrations, entry.Name()) {
 			migrationsInFolder = append(migrationsInFolder, types.Migration{
 				Path: path.Join(migrationsFolder, string(options.MigrationType), entry.Name()),
+				Name: entry.Name(),
 			})
 			if entry.Name() == options.From {
 				fromIndex = i
