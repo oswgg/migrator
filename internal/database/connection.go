@@ -2,10 +2,10 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/oswgg/migrator/internal/config"
+	"log"
 	"time"
 )
 
@@ -17,8 +17,10 @@ type Database struct {
 type DatabaseImpl interface {
 	TestConnection() error
 	VerifyTableExists(tableName string) (bool, error)
+	VerifyMigrationBeenExecuted(migrationName string) bool
 	CreateMigrationsTable() error
 	ExecMigrationFileContent(fileContent string, migrationName string) error
+	GetExecutedMigrations() *[]string
 }
 
 func NewDatabaseImpl(credentials *config.DatabaseConfig) (DatabaseImpl, error) {
@@ -70,21 +72,29 @@ func (d *Database) CreateMigrationsTable() error {
 	return nil
 }
 
-func (d *Database) ExecMigrationFileContent(fileContent string, migrationName string) error {
+func (d *Database) VerifyMigrationBeenExecuted(migrationName string) bool {
 	rows, err := d.connection.Query(
 		fmt.Sprintf("SELECT name FROM %s WHERE name = ?", d.MigrationsTableName),
 		migrationName,
 	)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	defer rows.Close()
 
 	if rows.Next() {
-		return errors.New("Migration file has already been executed")
+		return true
+	} else {
+		return false
+	}
+}
+
+func (d *Database) ExecMigrationFileContent(fileContent string, migrationName string) error {
+	if d.VerifyMigrationBeenExecuted(migrationName) {
+		return fmt.Errorf("migration file %v already exists", migrationName)
 	}
 
-	_, err = d.connection.Exec(fileContent)
+	_, err := d.connection.Exec(fileContent)
 	if err != nil {
 		return err
 	}
@@ -93,4 +103,23 @@ func (d *Database) ExecMigrationFileContent(fileContent string, migrationName st
 		return err
 	}
 	return nil
+}
+
+func (d *Database) GetExecutedMigrations() *[]string {
+	rows, err := d.connection.Query("SELECT name FROM migrations")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var migrations []string
+	for rows.Next() {
+		var migrationName string
+		if err := rows.Scan(&migrationName); err != nil {
+			log.Fatal(err)
+		}
+		migrations = append(migrations, migrationName)
+	}
+
+	return &migrations
 }
