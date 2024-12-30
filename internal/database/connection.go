@@ -20,6 +20,7 @@ type DatabaseImpl interface {
 	VerifyMigrationBeenExecuted(migrationName string) bool
 	CreateMigrationsTable() error
 	ExecMigrationFileContent(fileContent string, migrationName string) error
+	GetExecutedMigrations() *[]string
 }
 
 func NewDatabaseImpl(credentials *config.DatabaseConfig) (DatabaseImpl, error) {
@@ -102,4 +103,23 @@ func (d *Database) ExecMigrationFileContent(fileContent string, migrationName st
 		return err
 	}
 	return nil
+}
+
+func (d *Database) GetExecutedMigrations() *[]string {
+	rows, err := d.connection.Query("SELECT name FROM migrations")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var migrations []string
+	for rows.Next() {
+		var migrationName string
+		if err := rows.Scan(&migrationName); err != nil {
+			log.Fatal(err)
+		}
+		migrations = append(migrations, migrationName)
+	}
+
+	return &migrations
 }

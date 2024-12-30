@@ -26,6 +26,7 @@ type Migrator struct {
 
 type Migration struct {
 	Path string
+	Name string
 }
 
 type MigrationRunner interface {
@@ -55,17 +56,22 @@ func (m *Migrator) Up() error {
 		}
 	}
 
+	if len(m.Migrations) == 0 {
+		fmt.Println("No migrations pending")
+		return nil
+	}
+
 	for _, migration := range m.Migrations {
-		fmt.Printf("========= Migrating: %s =========\n", migration.Path)
+		fmt.Printf("========= Migrating: %s =========\n", migration.Name)
 		readFile, err := tools.ReadFile(migration.Path)
 		if err != nil {
 			return err
 		}
-		err = database.ExecMigrationFileContent(string(readFile), migration.Path)
+		err = database.ExecMigrationFileContent(string(readFile), migration.Name)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("========= Migrating: %s =========\n", migration.Path)
+		fmt.Printf("========= Migrating: %s =========\n", migration.Name)
 	}
 	return nil
 }
