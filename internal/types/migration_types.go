@@ -7,18 +7,11 @@ import (
 	"github.com/oswgg/migrator/pkg/tools"
 )
 
-type MigrationType string
-
-const (
-	MigrationUp   MigrationType = "up"
-	MigrationDown MigrationType = "down"
-)
-
 type Migrator struct {
 	Env               string
 	Specific          bool
 	SpecificMigration string
-	MigrationType     MigrationType
+	MigrationType     string
 	From              string
 	To                string
 	Migrations        []Migration

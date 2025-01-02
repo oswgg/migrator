@@ -20,7 +20,7 @@ var migrateCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var upDownFlag = args[0]
-		var upDownValue types.MigrationType
+		var upDownValue string
 
 		var isSpecific = false
 		var migrationName string
@@ -31,10 +31,10 @@ var migrateCmd = &cobra.Command{
 			migrationName = specificMigration
 		}
 
-		if upDownFlag == string(types.MigrationUp) {
-			upDownValue = types.MigrationUp
+		if upDownFlag == "up" {
+			upDownValue = "up"
 		} else {
-			upDownValue = types.MigrationDown
+			upDownValue = "down"
 		}
 
 		if isSpecific {
@@ -59,7 +59,7 @@ var migrateCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		if upDownValue == types.MigrationUp {
+		if upDownValue == "up" {
 			err := migrator.Up()
 			if err != nil {
 				fmt.Printf("Error: %v", err)
