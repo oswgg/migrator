@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/oswgg/migrator/internal/database/migrations"
+	"github.com/oswgg/migrator/internal/must"
 	types "github.com/oswgg/migrator/internal/types"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var specificMigration string
@@ -19,6 +18,8 @@ var migrateCmd = &cobra.Command{
 	Long:  `Run types.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		cli := must.NewCliMust()
+
 		var upDownFlag = args[0]
 		var upDownValue string
 
@@ -53,24 +54,12 @@ var migrateCmd = &cobra.Command{
 			}
 		}
 
-		migrator, err := migrations.NewMigrator(migratorValues)
-		if err != nil {
-			fmt.Printf("Error: %v", err)
-			os.Exit(0)
-		}
+		migrator := cli.Must(migrations.NewMigrator(migratorValues)).(types.MigrationRunner)
 
 		if upDownValue == "up" {
-			err := migrator.Up()
-			if err != nil {
-				fmt.Printf("Error: %v", err)
-				os.Exit(0)
-			}
+			cli.HandleError(migrator.Up())
 		} else {
-			err := migrator.Down()
-			if err != nil {
-				fmt.Printf("Error: %v", err)
-				os.Exit(0)
-			}
+			cli.HandleError(migrator.Down())
 		}
 	},
 }

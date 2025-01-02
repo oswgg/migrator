@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/oswgg/migrator/internal/must"
 	"github.com/oswgg/migrator/pkg/tools"
 	"gopkg.in/yaml.v3"
 	"path"
@@ -46,25 +47,18 @@ func GetUserTxTConfig() (*UserMigratorRCConfig, error) {
 }
 
 func GetUserYAMLConfig(env string) (*DatabaseConfig, error) {
+	cli := must.NewCliMust()
+
 	var err error
 	var userTxtConfigs *UserMigratorRCConfig
 
-	userTxtConfigs, err = GetUserTxTConfig()
-	if err != nil {
-		return nil, err
-	}
+	userTxtConfigs = cli.Must(GetUserTxTConfig()).(*UserMigratorRCConfig)
 
 	userConfig := UserYAMLConfig{}
 
-	yamlContent, err := tools.ReadFile(path.Join(userTxtConfigs.ConfigFolderPath, ConfigYamlFileName))
-	if err != nil {
-		return nil, err
-	}
+	yamlContent := cli.Must(tools.ReadFile(path.Join(userTxtConfigs.ConfigFolderPath, ConfigYamlFileName))).([]byte)
 
-	err = yaml.Unmarshal(yamlContent, &userConfig)
-	if err != nil {
-		return nil, err
-	}
+	cli.HandleError(yaml.Unmarshal(yamlContent, &userConfig))
 
 	var dbConfig *DatabaseConfig
 	switch env {

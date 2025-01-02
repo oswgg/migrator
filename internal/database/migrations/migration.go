@@ -3,25 +3,18 @@ package migrations
 import (
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
+	"github.com/oswgg/migrator/internal/must"
 	"github.com/oswgg/migrator/internal/types"
 	"github.com/oswgg/migrator/internal/utils"
 )
 
 func NewMigrator(options *types.Migrator) (types.MigrationRunner, error) {
-	migrations, err := utils.GetMigrations(options)
-	if err != nil {
-		return nil, err
-	}
+	cli := must.NewCliMust()
+	migrations := cli.Must(utils.GetMigrations(options)).([]types.Migration)
 
-	config, err := config.GetUserYAMLConfig(options.Env)
-	if err != nil {
-		return nil, err
-	}
+	config := cli.Must(config.GetUserYAMLConfig(options.Env)).(*config.DatabaseConfig)
 
-	connection, err := database.NewDatabaseImpl(config)
-	if err != nil {
-		return nil, err
-	}
+	connection := cli.Must(database.NewDatabaseImpl(config)).(database.DatabaseImpl)
 
 	return &types.Migrator{
 		Specific:          options.Specific,
@@ -32,5 +25,6 @@ func NewMigrator(options *types.Migrator) (types.MigrationRunner, error) {
 		Env:               options.Env,
 		Migrations:        migrations,
 		Connection:        connection,
+		Cli:               cli,
 	}, nil
 }

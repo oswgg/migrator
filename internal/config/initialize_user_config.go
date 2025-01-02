@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/oswgg/migrator/internal/must"
 	"github.com/oswgg/migrator/pkg/tools"
 	"os"
 	"path/filepath"
@@ -20,6 +21,7 @@ var configTemplates = map[string]string{
 }
 
 func InitializeConfigurationFiles() error {
+	cli := must.NewCliMust()
 	var err error
 	// Verify .migratorrc exists
 	if tools.FileExists(MigratorRCFileName) {
@@ -42,9 +44,7 @@ func InitializeConfigurationFiles() error {
 		return fmt.Errorf("config_folder_path is missing in %s", MigratorRCFileName)
 	}
 
-	if err = os.MkdirAll(configFolderPath, DirPerm); err != nil {
-		return fmt.Errorf("error creating config directory: %w", err)
-	}
+	cli.MustWithMessage("", os.MkdirAll(configFolderPath, DirPerm), "error creating config directory")
 
 	// Verifica si config.yaml ya existe
 	configYamlPath := filepath.Join(configFolderPath, ConfigYamlFileName)
@@ -59,9 +59,7 @@ func InitializeConfigurationFiles() error {
 		}
 
 		filePath := filepath.Join(configFolderPath, filename)
-		if err = tools.CreateAndWriteFile(filePath, template, FilePerm); err != nil {
-			return fmt.Errorf("error writing %s file: %w", filename, err)
-		}
+		cli.MustWithMessage("", tools.CreateAndWriteFile(filePath, template, FilePerm), fmt.Sprintf("error writing %s file: %v", template, err))
 	}
 
 	return nil
