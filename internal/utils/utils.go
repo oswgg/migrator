@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
@@ -53,10 +54,11 @@ func GetMigrations(options *types.Migrator) ([]types.Migration, error) {
 
 	migrationsInFolder := make([]types.Migration, 0, len(readedFolder))
 	executedMigrations := connection.GetExecutedMigrations()
-	var fromIndex, toIndex int
+	var fromIndex = -100
+	var toIndex = -100
 
 	for i, entry := range readedFolder {
-		if !Contains(executedMigrations, entry.Name()) {
+		if options.MigrationType == "up" && !Contains(executedMigrations, entry.Name()) || options.MigrationType == "down" && Contains(executedMigrations, entry.Name()) {
 			migrationsInFolder = append(migrationsInFolder, types.Migration{
 				Path: path.Join(migrationsFolder, string(options.MigrationType), entry.Name()),
 				Name: entry.Name(),
@@ -75,6 +77,13 @@ func GetMigrations(options *types.Migrator) ([]types.Migration, error) {
 	}
 	if options.To == "" {
 		toIndex = len(migrationsInFolder) - 1
+	}
+
+	if fromIndex == -100 {
+		return []types.Migration{}, errors.New("migration of flag \"from\" not found")
+	}
+	if toIndex == -100 {
+		return []types.Migration{}, errors.New("migration of flag \"to\" not found")
 	}
 
 	return migrationsInFolder[fromIndex : toIndex+1], nil
