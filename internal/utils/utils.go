@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
-	types "github.com/oswgg/migrator/internal/types"
+	"github.com/oswgg/migrator/internal/types"
 	"github.com/oswgg/migrator/pkg/tools"
 	"log"
 	"os"
@@ -27,12 +27,16 @@ func GetMigrations(options *types.Migrator) ([]types.Migration, error) {
 	var migrationsFolder = configurations["migrations_folder_path"]
 
 	if options.Specific {
-		if connection.VerifyMigrationBeenExecuted(options.SpecificMigration) {
+		if options.MigrationType == "up" && connection.VerifyMigrationBeenExecuted(options.SpecificMigration) {
 			return nil, fmt.Errorf("migration %v already been executed", options.SpecificMigration)
 		}
 
+		if options.MigrationType == "down" && !connection.VerifyMigrationBeenExecuted(options.SpecificMigration) {
+			return nil, fmt.Errorf("migration %v have not been executed", options.SpecificMigration)
+		}
+
 		specificMigration := types.Migration{
-			Path: path.Join(migrationsFolder, string(options.MigrationType), options.SpecificMigration),
+			Path: path.Join(migrationsFolder, options.MigrationType, options.SpecificMigration),
 			Name: options.SpecificMigration,
 		}
 

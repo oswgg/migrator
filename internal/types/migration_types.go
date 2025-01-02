@@ -1,6 +1,7 @@
 package types
 
 import (
+	"errors"
 	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
@@ -15,6 +16,7 @@ type Migrator struct {
 	From              string
 	To                string
 	Migrations        []Migration
+	Connection        database.DatabaseImpl
 }
 
 type Migration struct {
@@ -33,17 +35,13 @@ func (m *Migrator) Up() error {
 		return err
 	}
 
-	database, err := database.NewDatabaseImpl(configurations)
+	migrationsTableExists, err := m.Connection.VerifyTableExists(configurations.MigrationsTableName)
 	if err != nil {
 		return err
 	}
 
-	migrationsTableExists, err := database.VerifyTableExists(configurations.MigrationsTableName)
-	if err != nil {
-		return err
-	}
 	if !migrationsTableExists {
-		err := database.CreateMigrationsTable()
+		err := m.Connection.CreateMigrationsTable()
 		if err != nil {
 			return err
 		}
@@ -55,12 +53,12 @@ func (m *Migrator) Up() error {
 	}
 
 	for _, migration := range m.Migrations {
-		fmt.Printf("========= Migrating: %s =========\n", migration.Name)
 		readFile, err := tools.ReadFile(migration.Path)
 		if err != nil {
 			return err
 		}
-		err = database.ExecMigrationFileContent(string(readFile), migration.Name)
+		fmt.Printf("========= Migrating: %s =========\n", migration.Name)
+		err = m.Connection.ExecMigrationFileContent(string(readFile), migration.Name, "up")
 		if err != nil {
 			return err
 		}
