@@ -19,8 +19,9 @@ type DatabaseImpl interface {
 	VerifyTableExists(tableName string) (bool, error)
 	VerifyMigrationBeenExecuted(migrationName string) bool
 	CreateMigrationsTable() error
-	ExecMigrationFileContent(fileContent string, migrationName string) error
+	ExecMigrationFileContent(fileContent string, migrationName string, upOrDown string) error
 	GetExecutedMigrations() *[]string
+	RegisterExecutedMigration(migrationName string) error
 }
 
 func NewDatabaseImpl(credentials *config.DatabaseConfig) (DatabaseImpl, error) {
@@ -89,8 +90,8 @@ func (d *Database) VerifyMigrationBeenExecuted(migrationName string) bool {
 	}
 }
 
-func (d *Database) ExecMigrationFileContent(fileContent string, migrationName string) error {
-	if d.VerifyMigrationBeenExecuted(migrationName) {
+func (d *Database) ExecMigrationFileContent(fileContent string, migrationName string, upOrDown string) error {
+	if upOrDown == "up" && d.VerifyMigrationBeenExecuted(migrationName) {
 		return fmt.Errorf("migration file %v already exists", migrationName)
 	}
 
@@ -98,10 +99,19 @@ func (d *Database) ExecMigrationFileContent(fileContent string, migrationName st
 	if err != nil {
 		return err
 	}
-	_, err = d.connection.Exec("INSERT INTO migrations (name, runAt) VALUES (?, ?)", migrationName, time.Now())
-	if err != nil {
-		return err
+
+	if upOrDown == "up" {
+		err := d.RegisterExecutedMigration(migrationName)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := d.RemoveExecutedMigration(migrationName)
+		if err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
@@ -122,4 +132,20 @@ func (d *Database) GetExecutedMigrations() *[]string {
 	}
 
 	return &migrations
+}
+
+func (d *Database) RegisterExecutedMigration(migrationName string) error {
+	_, err := d.connection.Exec("INSERT INTO migrations (name, runAt) VALUES (?, ?)", migrationName, time.Now())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *Database) RemoveExecutedMigration(migrationName string) error {
+	_, err := d.connection.Exec(fmt.Sprintf("DELETE FROM %v WHERE name = ?", d.MigrationsTableName), migrationName)
+	if err != nil {
+		return err
+	}
+	return nil
 }

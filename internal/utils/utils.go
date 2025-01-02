@@ -1,10 +1,11 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
-	types "github.com/oswgg/migrator/internal/types"
+	"github.com/oswgg/migrator/internal/types"
 	"github.com/oswgg/migrator/pkg/tools"
 	"log"
 	"os"
@@ -27,12 +28,16 @@ func GetMigrations(options *types.Migrator) ([]types.Migration, error) {
 	var migrationsFolder = configurations["migrations_folder_path"]
 
 	if options.Specific {
-		if connection.VerifyMigrationBeenExecuted(options.SpecificMigration) {
+		if options.MigrationType == "up" && connection.VerifyMigrationBeenExecuted(options.SpecificMigration) {
 			return nil, fmt.Errorf("migration %v already been executed", options.SpecificMigration)
 		}
 
+		if options.MigrationType == "down" && !connection.VerifyMigrationBeenExecuted(options.SpecificMigration) {
+			return nil, fmt.Errorf("migration %v have not been executed", options.SpecificMigration)
+		}
+
 		specificMigration := types.Migration{
-			Path: path.Join(migrationsFolder, string(options.MigrationType), options.SpecificMigration),
+			Path: path.Join(migrationsFolder, options.MigrationType, options.SpecificMigration),
 			Name: options.SpecificMigration,
 		}
 
@@ -49,10 +54,11 @@ func GetMigrations(options *types.Migrator) ([]types.Migration, error) {
 
 	migrationsInFolder := make([]types.Migration, 0, len(readedFolder))
 	executedMigrations := connection.GetExecutedMigrations()
-	var fromIndex, toIndex int
+	var fromIndex = -100
+	var toIndex = -100
 
 	for i, entry := range readedFolder {
-		if !Contains(executedMigrations, entry.Name()) {
+		if options.MigrationType == "up" && !Contains(executedMigrations, entry.Name()) || options.MigrationType == "down" && Contains(executedMigrations, entry.Name()) {
 			migrationsInFolder = append(migrationsInFolder, types.Migration{
 				Path: path.Join(migrationsFolder, string(options.MigrationType), entry.Name()),
 				Name: entry.Name(),
@@ -71,6 +77,13 @@ func GetMigrations(options *types.Migrator) ([]types.Migration, error) {
 	}
 	if options.To == "" {
 		toIndex = len(migrationsInFolder) - 1
+	}
+
+	if fromIndex == -100 {
+		return []types.Migration{}, errors.New("migration of flag \"from\" not found")
+	}
+	if toIndex == -100 {
+		return []types.Migration{}, errors.New("migration of flag \"to\" not found")
 	}
 
 	return migrationsInFolder[fromIndex : toIndex+1], nil
