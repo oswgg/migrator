@@ -27,7 +27,15 @@ func (c *CliMust) Must(data any, err error) any {
 func (c *CliMust) MustWithMessage(data any, err error, message string) any {
 	if err != nil {
 		fmt.Printf("Error: %v", message)
+		os.Exit(c.exitCode)
 	}
 
 	return data
+}
+
+func (c *CliMust) HandleError(err error) {
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		os.Exit(c.exitCode)
+	}
 }
