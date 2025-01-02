@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
+	"github.com/oswgg/migrator/internal/types"
 	"github.com/spf13/cobra"
 )
 
@@ -15,21 +15,13 @@ var testConnectionCmd = &cobra.Command{
 	Short:   "Test connection",
 	Long:    "Test database connection with the preset config files",
 	Run: func(cmd *cobra.Command, args []string) {
+		cli := types.NewCliMust()
 
-		databaseCredentials, err := config.GetUserYAMLConfig(environment)
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
+		databaseCredentials := cli.Must(config.GetUserYAMLConfig(environment)).(*config.DatabaseConfig)
 
-		db, err := database.NewDatabaseImpl(databaseCredentials)
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
+		db := cli.Must(database.NewDatabaseImpl(databaseCredentials)).(database.DatabaseImpl)
 
-		err = db.TestConnection()
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
+		cli.HandleError(db.TestConnection())
 	},
 }
 
