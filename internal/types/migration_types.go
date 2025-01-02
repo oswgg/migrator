@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
+	"github.com/oswgg/migrator/internal/must"
 	"github.com/oswgg/migrator/pkg/tools"
 )
 
@@ -17,6 +18,7 @@ type Migrator struct {
 	To                string
 	Migrations        []Migration
 	Connection        database.DatabaseImpl
+	Cli               *must.CliMust
 }
 
 type Migration struct {
@@ -30,21 +32,12 @@ type MigrationRunner interface {
 }
 
 func (m *Migrator) Up() error {
-	configurations, err := config.GetUserYAMLConfig(m.Env)
-	if err != nil {
-		return err
-	}
+	configurations := m.Cli.Must(config.GetUserYAMLConfig(m.Env)).(*config.DatabaseConfig)
 
-	migrationsTableExists, err := m.Connection.VerifyTableExists(configurations.MigrationsTableName)
-	if err != nil {
-		return err
-	}
+	migrationsTableExists := m.Cli.Must(m.Connection.VerifyTableExists(configurations.MigrationsTableName)).(bool)
 
 	if !migrationsTableExists {
-		err := m.Connection.CreateMigrationsTable()
-		if err != nil {
-			return err
-		}
+		m.Cli.HandleError(m.Connection.CreateMigrationsTable())
 	}
 
 	if len(m.Migrations) == 0 {
@@ -53,30 +46,21 @@ func (m *Migrator) Up() error {
 	}
 
 	for _, migration := range m.Migrations {
-		readFile, err := tools.ReadFile(migration.Path)
-		if err != nil {
-			return err
-		}
+		readFile := m.Cli.Must(tools.ReadFile(migration.Path)).([]byte)
+
 		fmt.Printf("========= Migrating: %s =========\n", migration.Name)
-		err = m.Connection.ExecMigrationFileContent(string(readFile), migration.Name, "up")
-		if err != nil {
-			return err
-		}
+
+		m.Cli.HandleError(m.Connection.ExecMigrationFileContent(string(readFile), migration.Name, "up"))
+
 		fmt.Printf("========= Migrated: %s =========\n\n", migration.Name)
 	}
 	return nil
 }
 
 func (m *Migrator) Down() error {
-	configurations, err := config.GetUserYAMLConfig(m.Env)
-	if err != nil {
-		return err
-	}
+	configurations := m.Cli.Must(config.GetUserYAMLConfig(m.Env)).(*config.DatabaseConfig)
 
-	migrationsTableExists, err := m.Connection.VerifyTableExists(configurations.MigrationsTableName)
-	if err != nil {
-		return err
-	}
+	migrationsTableExists := m.Cli.Must(m.Connection.VerifyTableExists(configurations.MigrationsTableName)).(bool)
 
 	if !migrationsTableExists {
 		return errors.New("no migrations table exists")
@@ -87,15 +71,12 @@ func (m *Migrator) Down() error {
 	}
 
 	for _, migration := range m.Migrations {
-		readFile, err := tools.ReadFile(migration.Path)
-		if err != nil {
-			return err
-		}
+		readFile := m.Cli.Must(tools.ReadFile(migration.Path)).([]byte)
+
 		fmt.Printf("========= Migrating Down: %s =========\n", migration.Name)
-		err = m.Connection.ExecMigrationFileContent(string(readFile), migration.Name, "down")
-		if err != nil {
-			return err
-		}
+
+		m.Cli.HandleError(m.Connection.ExecMigrationFileContent(string(readFile), migration.Name, "down"))
+
 		fmt.Printf("========= Migrated Down: %s =========\n\n", migration.Name)
 	}
 
