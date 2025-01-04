@@ -1,4 +1,4 @@
-package must
+package shared
 
 import (
 	"fmt"
