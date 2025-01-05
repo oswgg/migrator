@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/oswgg/migrator/internal/migrations"
+	"github.com/oswgg/migrator/internal/database/migrations"
 	"github.com/oswgg/migrator/internal/shared"
+	types "github.com/oswgg/migrator/internal/types"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +25,7 @@ var migrateCmd = &cobra.Command{
 
 		var isSpecific = false
 		var migrationName string
-		var migratorValues migrations.MigratorExecutor
+		var migratorValues *types.Migrator
 
 		if specificMigration != "" {
 			isSpecific = true
@@ -38,14 +39,14 @@ var migrateCmd = &cobra.Command{
 		}
 
 		if isSpecific {
-			migratorValues = migrations.MigratorExecutor{
+			migratorValues = &types.Migrator{
 				Specific:          isSpecific,
 				SpecificMigration: migrationName,
 				MigrationType:     upDownValue,
 				Env:               env,
 			}
 		} else {
-			migratorValues = migrations.MigratorExecutor{
+			migratorValues = &types.Migrator{
 				From:          fromMigration,
 				To:            toMigration,
 				MigrationType: upDownValue,
@@ -53,7 +54,7 @@ var migrateCmd = &cobra.Command{
 			}
 		}
 
-		migrator := cli.Must(migrations.NewMigrator(migratorValues)).(migrations.MigratorExecutor)
+		migrator := cli.Must(migrations.NewMigrator(migratorValues)).(types.MigrationRunner)
 
 		if upDownValue == "up" {
 			cli.HandleError(migrator.Up())
