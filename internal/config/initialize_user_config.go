@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/oswgg/migrator/internal/must"
+	"github.com/oswgg/migrator/internal/shared"
 	"github.com/oswgg/migrator/pkg/tools"
 	"os"
 	"path/filepath"
@@ -21,7 +21,7 @@ var configTemplates = map[string]string{
 }
 
 func InitializeConfigurationFiles() error {
-	cli := must.NewCliMust()
+	cli := shared.NewCliMust()
 	var err error
 	// Verify .migratorrc exists
 	if tools.FileExists(MigratorRCFileName) {

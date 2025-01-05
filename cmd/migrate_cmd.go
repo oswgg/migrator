@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/oswgg/migrator/internal/database/migrations"
-	"github.com/oswgg/migrator/internal/must"
+	"github.com/oswgg/migrator/internal/shared"
 	types "github.com/oswgg/migrator/internal/types"
 	"github.com/spf13/cobra"
 )
@@ -18,7 +18,7 @@ var migrateCmd = &cobra.Command{
 	Long:  `Run types.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		cli := must.NewCliMust()
+		cli := shared.NewCliMust()
 
 		var upDownFlag = args[0]
 		var upDownValue string

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
-	"github.com/oswgg/migrator/internal/must"
+	"github.com/oswgg/migrator/internal/shared"
 	"github.com/oswgg/migrator/pkg/tools"
 )
 
@@ -18,7 +18,7 @@ type Migrator struct {
 	To                string
 	Migrations        []Migration
 	Connection        database.DatabaseImpl
-	Cli               *must.CliMust
+	Cli               *shared.CliMust
 }
 
 type Migration struct {
