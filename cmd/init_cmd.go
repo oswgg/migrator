@@ -9,7 +9,7 @@ import (
 
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Init the migrator options file",
+	Short: "Init the types options file",
 	Long:  "Create a file .migratorrc that contains all the database options required",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {

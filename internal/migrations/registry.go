@@ -1,10 +1,12 @@
 package migrations
 
-import "sort"
+import (
+	"sort"
+)
 
 type MigrationEntry struct {
 	Name         string
-	GetMigration func()
+	GetMigration func() []string
 }
 
 type MigrationRegistry struct {
@@ -15,7 +17,7 @@ var Registry = &MigrationRegistry{
 	migrations: make(map[string]MigrationEntry),
 }
 
-func (r *MigrationRegistry) Register(name string, getMigration func()) {
+func (r *MigrationRegistry) Register(name string, getMigration func() []string) {
 	r.migrations[name] = MigrationEntry{
 		Name:         name,
 		GetMigration: getMigration,

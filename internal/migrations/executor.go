@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
 	"github.com/oswgg/migrator/internal/shared"
@@ -31,9 +32,9 @@ func NewMigrator(options MigratorExecutor) (MigratorExecutor, error) {
 		From:              options.From,
 		To:                options.To,
 		Env:               options.Env,
+		Registry:          options.Registry,
 		Connection:        connection,
 		Cli:               cli,
-		Registry:          Registry,
 	}, nil
 }
 
@@ -50,6 +51,17 @@ func (m *MigratorExecutor) Up() error {
 		return nil
 	}
 
+	for _, migration := range m.Registry.GetAllMigrations() {
+		fmt.Printf(" ===== Running migration %v =====\n", migration.Name)
+
+		for _, operation := range migration.GetMigration() {
+
+			m.Cli.HandleError(m.Connection.ExecMigrationFileContent(operation, migration.Name, "up"))
+		}
+		m.Cli.HandleError(m.Connection.RegisterExecutedMigration(migration.Name))
+
+		fmt.Printf(" ===== Migration Executed %s =====\n", migration.Name)
+	}
 	return nil
 }
 
