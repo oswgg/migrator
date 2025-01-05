@@ -42,7 +42,7 @@ func (f *FileGenerator) CreateMigration(name string, description string) (string
 	}
 	timestamp := time.Now().Format("20060102150405")
 
-	upMigrationPath := filepath.Join(f.UpMigrationsDir, timestamp+"_"+name+".sql")
+	upMigrationPath := filepath.Join(f.UpMigrationsDir, timestamp+"_"+name+".go")
 	downMigrationPath := filepath.Join(f.DownMigrationsDir, timestamp+"_"+name+".sql")
 
 	upMigrationTemplate := getTemplateMigration(description, true)
@@ -80,7 +80,15 @@ func (f *FileGenerator) CreateMigration(name string, description string) (string
 
 func getTemplateMigration(desc string, up bool) string {
 	if up {
-		return fmt.Sprintf(`-- Up %s`, desc)
+		return fmt.Sprintf(`package up 
+// Up %s
+
+import "github.com/oswgg/migrator/internal/database/migrations"
+
+func getMigration() {
+	queryMigrator := migrations.NewQueryMigrator()
+	queryMigrator.CreateTable()
+}`, desc)
 	}
 	return fmt.Sprintf(`-- Down %s`, desc)
 }
