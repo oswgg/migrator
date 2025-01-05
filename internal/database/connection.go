@@ -5,7 +5,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/oswgg/migrator/internal/config"
-	"github.com/oswgg/migrator/internal/shared"
+	"github.com/oswgg/migrator/internal/must"
 	"log"
 	"time"
 )
@@ -13,7 +13,7 @@ import (
 type Database struct {
 	config.DatabaseConfig
 	connection *sql.DB
-	cli        *shared.CliMust
+	cli        *must.CliMust
 }
 
 type DatabaseImpl interface {
@@ -27,7 +27,7 @@ type DatabaseImpl interface {
 }
 
 func NewDatabaseImpl(credentials *config.DatabaseConfig) (DatabaseImpl, error) {
-	cli := shared.NewCliMust()
+	cli := must.NewCliMust()
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", credentials.Username, credentials.Password, credentials.Host, credentials.Database)
 
 	connection := cli.Must(sql.Open("mysql", dsn)).(*sql.DB)

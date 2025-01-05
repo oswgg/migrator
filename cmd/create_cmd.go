@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database/migrations"
-	"github.com/oswgg/migrator/internal/shared"
+	"github.com/oswgg/migrator/internal/must"
 	"github.com/oswgg/migrator/pkg/tools"
 	"github.com/spf13/cobra"
 )
@@ -18,7 +18,7 @@ var createCmd = &cobra.Command{
 	Long:  "Create a new migration files for up and down",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		cli := shared.NewCliMust()
+		cli := must.NewCliMust()
 
 		name := args[0]
 

@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/oswgg/migrator/internal/shared"
+	"github.com/oswgg/migrator/internal/must"
 	"github.com/oswgg/migrator/pkg/tools"
 	"gopkg.in/yaml.v3"
 	"path"
@@ -47,7 +47,7 @@ func GetUserTxTConfig() (*UserMigratorRCConfig, error) {
 }
 
 func GetUserYAMLConfig(env string) (*DatabaseConfig, error) {
-	cli := shared.NewCliMust()
+	cli := must.NewCliMust()
 
 	var err error
 	var userTxtConfigs *UserMigratorRCConfig
