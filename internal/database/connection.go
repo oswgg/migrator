@@ -101,12 +101,6 @@ func (d *Database) ExecMigrationFileContent(fileContent string, migrationName st
 		return err
 	}
 
-	if upOrDown == "up" {
-		d.cli.HandleError(d.RegisterExecutedMigration(migrationName))
-	} else {
-		d.cli.HandleError(d.RemoveExecutedMigration(migrationName))
-	}
-
 	return nil
 }
 

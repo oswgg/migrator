@@ -43,10 +43,10 @@ func (f *FileGenerator) CreateMigration(name string, description string) (string
 	timestamp := time.Now().Format("20060102150405")
 
 	upMigrationPath := filepath.Join(f.UpMigrationsDir, timestamp+"_"+name+".go")
-	downMigrationPath := filepath.Join(f.DownMigrationsDir, timestamp+"_"+name+".sql")
+	downMigrationPath := filepath.Join(f.DownMigrationsDir, timestamp+"_"+name+".go")
 
-	upMigrationTemplate := getTemplateMigration(description, true)
-	downMigrationTemplate := getTemplateMigration(description, false)
+	upMigrationTemplate := getTemplateMigration(fmt.Sprintf("%v_%v", timestamp, name), description, "up")
+	downMigrationTemplate := getTemplateMigration(fmt.Sprintf("%v_%v", timestamp, name), description, "down")
 
 	upChan := make(chan FileResult)
 	downChan := make(chan FileResult)
@@ -78,17 +78,30 @@ func (f *FileGenerator) CreateMigration(name string, description string) (string
 	return fmt.Sprintf("Migration files created successfully:\n- Up: %s\n- Down: %s", upResponse.Path, downResponse.Path), nil
 }
 
-func getTemplateMigration(desc string, up bool) string {
-	if up {
-		return fmt.Sprintf(`package up 
-// Up %s
+func getTemplateMigration(name string, desc string, migrationType string) string {
+	if migrationType == "up" {
+		return fmt.Sprintf(`package up
+// Up %v
 
-import "github.com/oswgg/migrator/internal/database/migrations"
+import (
+	"github.com/oswgg/types/internal/migrations"
+	"github.com/oswgg/types/internal/types"
+)
+
+// Up
+
+func init() {
+	migrations.Registry.Register("%v", func() {
+		queryMigrator := migrations.NewQueryMigrator()
+	})
+}
+`, desc, name)
+	}
+	return fmt.Sprintf(`package down
+// Down %s
+
+import "github.com/oswgg/types/internal/database/migrations"
 
 func getMigration() {
-	queryMigrator := migrations.NewQueryMigrator()
-	queryMigrator.CreateTable()
 }`, desc)
-	}
-	return fmt.Sprintf(`-- Down %s`, desc)
 }

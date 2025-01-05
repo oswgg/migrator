@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/config"
-	"github.com/oswgg/migrator/internal/database/migrations"
+	"github.com/oswgg/migrator/internal/migrations"
 	"github.com/oswgg/migrator/internal/shared"
 	"github.com/oswgg/migrator/pkg/tools"
 	"github.com/spf13/cobra"
