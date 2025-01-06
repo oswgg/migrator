@@ -7,15 +7,20 @@ import (
 )
 
 type QueryMigrator struct {
-	transpiler *SQLTranspiler
-	cli        *shared.CliMust
-	result     []string
+	transpiler     *SQLTranspiler
+	cli            *shared.CliMust
+	upOperations   []*types.Operation
+	downOperations []*types.Operation
 }
 
 type MigratorInterpreter interface {
-	CreateTable(table *types.Table)
-	AddConstraint(constraint *types.Constraint)
-	SQL() []string
+	// Tables
+	CreateTable(table *types.Table) *types.Operation
+	DropTable(tableName string) *types.Operation
+
+	// Constraints
+	AddConstraint(constraint *types.Constraint) *types.Operation
+	//SQL() []*types.Operation
 }
 
 func NewQueryMigrator() MigratorInterpreter {
@@ -26,18 +31,21 @@ func NewQueryMigrator() MigratorInterpreter {
 	return &QueryMigrator{
 		transpiler: NewSQLTranspiler(databaseConfig.Dialect),
 		cli:        cli,
-		result:     []string{},
 	}
 }
 
-func (m *QueryMigrator) CreateTable(table *types.Table) {
-	m.result = append(m.result, m.transpiler.TranspileTable(table))
+func (m *QueryMigrator) CreateTable(table *types.Table) *types.Operation {
+	return m.transpiler.TranspileTable(table)
 }
 
-func (m *QueryMigrator) AddConstraint(constraint *types.Constraint) {
-	m.result = append(m.result, m.transpiler.TranspileConstraint(constraint))
+func (m *QueryMigrator) DropTable(tableName string) *types.Operation {
+	return m.transpiler.DropTable(tableName)
 }
 
-func (m *QueryMigrator) SQL() []string {
-	return m.result
+func (m *QueryMigrator) AddConstraint(constraint *types.Constraint) *types.Operation {
+	return m.transpiler.TranspileConstraint(constraint)
 }
+
+//func (m *QueryMigrator) SQL() []*types.Operation {
+//	return m.result
+//}
