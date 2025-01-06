@@ -20,7 +20,7 @@ func NewSQLTranspiler(dialect string) *SQLTranspiler {
 	}
 }
 
-func (t *SQLTranspiler) TranspileTable(table *types.Table) string {
+func (t *SQLTranspiler) TranspileTable(table *types.Table) *types.Operation {
 	var strBuilder strings.Builder
 
 	strBuilder.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %v (", table.Name))
@@ -39,7 +39,16 @@ func (t *SQLTranspiler) TranspileTable(table *types.Table) string {
 
 	strBuilder.WriteString("\n);")
 
-	return strBuilder.String()
+	operation := types.Operation(strBuilder.String())
+
+	return &operation
+}
+
+func (t *SQLTranspiler) DropTable(tableName string) *types.Operation {
+	var strBuilder strings.Builder
+	strBuilder.WriteString(fmt.Sprintf("DROP TABLE IF EXISTS %v;", tableName))
+	operation := types.Operation(strBuilder.String())
+	return &operation
 }
 
 func (t *SQLTranspiler) TranspileColumn(column *types.Column) string {
@@ -66,7 +75,7 @@ func (t *SQLTranspiler) TranspileColumn(column *types.Column) string {
 	return str.String()
 }
 
-func (t *SQLTranspiler) TranspileConstraint(constraint *types.Constraint) string {
+func (t *SQLTranspiler) TranspileConstraint(constraint *types.Constraint) *types.Operation {
 	var str strings.Builder
 
 	if constraint.Table == "" {
@@ -105,5 +114,7 @@ func (t *SQLTranspiler) TranspileConstraint(constraint *types.Constraint) string
 		str.WriteString(fmt.Sprintf(" INDEX (%v)", constraint.Fields[0]))
 	}
 
-	return str.String()
+	operation := types.Operation(str.String())
+
+	return &operation
 }

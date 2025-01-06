@@ -1,12 +1,14 @@
 package migrations
 
 import (
+	"github.com/oswgg/migrator/internal/types"
 	"sort"
 )
 
 type MigrationEntry struct {
-	Name         string
-	GetMigration func() []string
+	Name string
+	Up   []*types.Operation
+	Down []*types.Operation
 }
 
 type MigrationRegistry struct {
@@ -17,10 +19,11 @@ var Registry = &MigrationRegistry{
 	migrations: make(map[string]MigrationEntry),
 }
 
-func (r *MigrationRegistry) Register(name string, getMigration func() []string) {
+func (r *MigrationRegistry) Register(name string, migration *types.Migration) {
 	r.migrations[name] = MigrationEntry{
-		Name:         name,
-		GetMigration: getMigration,
+		Name: name,
+		Up:   migration.Up,
+		Down: migration.Down,
 	}
 }
 

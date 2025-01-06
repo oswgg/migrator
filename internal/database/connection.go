@@ -24,6 +24,7 @@ type DatabaseImpl interface {
 	ExecMigrationFileContent(fileContent string, migrationName string, upOrDown string) error
 	GetExecutedMigrations() *[]string
 	RegisterExecutedMigration(migrationName string) error
+	RemoveExecutedMigration(migrationName string) error
 }
 
 func NewDatabaseImpl(credentials *config.DatabaseConfig) (DatabaseImpl, error) {

@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"errors"
 	"fmt"
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
@@ -54,9 +55,8 @@ func (m *MigratorExecutor) Up() error {
 	for _, migration := range m.Registry.GetAllMigrations() {
 		fmt.Printf(" ===== Running migration %v =====\n", migration.Name)
 
-		for _, operation := range migration.GetMigration() {
-
-			m.Cli.HandleError(m.Connection.ExecMigrationFileContent(operation, migration.Name, "up"))
+		for _, operation := range migration.Up {
+			m.Cli.HandleError(m.Connection.ExecMigrationFileContent(string(*operation), migration.Name, "up"))
 		}
 		m.Cli.HandleError(m.Connection.RegisterExecutedMigration(migration.Name))
 
@@ -66,27 +66,23 @@ func (m *MigratorExecutor) Up() error {
 }
 
 func (m *MigratorExecutor) Down() error {
-	//configurations := m.Cli.Must(config.GetUserYAMLConfig(m.Env)).(*config.DatabaseConfig)
-	//
-	//migrationsTableExists := m.Cli.Must(m.Connection.VerifyTableExists(configurations.MigrationsTableName)).(bool)
-	//
-	//if !migrationsTableExists {
-	//	return errors.New("no migrations table exists")
-	//}
-	//
-	//if len(m.Migrations) == 0 {
-	//	fmt.Println("No migrations pending to be down")
-	//}
-	//
-	//for _, migration := range m.Migrations {
-	//	readFile := m.Cli.Must(tools.ReadFile(migration.Path)).([]byte)
-	//
-	//	fmt.Printf("========= Migrating Down: %s =========\n", migration.Name)
-	//
-	//	m.Cli.HandleError(m.Connection.ExecMigrationFileContent(string(readFile), migration.Name, "down"))
-	//
-	//	fmt.Printf("========= Migrated Down: %s =========\n\n", migration.Name)
-	//}
+	configurations := m.Cli.Must(config.GetUserYAMLConfig(m.Env)).(*config.DatabaseConfig)
+	migrationsTableExists := m.Cli.Must(m.Connection.VerifyTableExists(configurations.MigrationsTableName)).(bool)
+
+	if !migrationsTableExists {
+		return errors.New("no migrations table exists")
+	}
+
+	for _, migration := range m.Registry.GetAllMigrations() {
+		fmt.Printf(" ===== Reverting migration %v =====\n", migration.Name)
+
+		for _, operation := range migration.Down {
+			m.Cli.HandleError(m.Connection.ExecMigrationFileContent(string(*operation), migration.Name, "down"))
+		}
+		m.Cli.HandleError(m.Connection.RemoveExecutedMigration(migration.Name))
+
+		fmt.Printf(" ===== Migration Reverted %s =====\n", migration.Name)
+	}
 
 	return nil
 }

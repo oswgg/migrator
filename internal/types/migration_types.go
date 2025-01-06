@@ -1,18 +1,15 @@
 package types
 
+type Operation string
+
 type MigrationFile struct {
 	Path string
 	Name string
 }
 
 type Migration struct {
-	Up   []string
-	Down []string
-}
-
-type Table struct {
-	Name    string
-	Columns map[string]Column
+	Up   []*Operation
+	Down []*Operation
 }
 
 type Column struct {
@@ -23,6 +20,13 @@ type Column struct {
 	Autoincrement bool
 	Comment       string
 	DefaultValue  interface{}
+}
+
+type Columns map[string]Column
+
+type Table struct {
+	Name    string
+	Columns Columns
 }
 
 type ConstraintType string
