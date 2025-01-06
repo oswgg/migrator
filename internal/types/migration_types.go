@@ -1,84 +1,56 @@
 package types
 
-import (
-	"errors"
-	"fmt"
-	"github.com/oswgg/migrator/internal/config"
-	"github.com/oswgg/migrator/internal/database"
-	"github.com/oswgg/migrator/internal/must"
-	"github.com/oswgg/migrator/pkg/tools"
-)
+type Operation string
 
-type Migrator struct {
-	Env               string
-	Specific          bool
-	SpecificMigration string
-	MigrationType     string
-	From              string
-	To                string
-	Migrations        []Migration
-	Connection        database.DatabaseImpl
-	Cli               *must.CliMust
-}
-
-type Migration struct {
+type MigrationFile struct {
 	Path string
 	Name string
 }
 
-type MigrationRunner interface {
-	Up() error
-	Down() error
+type Migration struct {
+	Up   []*Operation
+	Down []*Operation
 }
 
-func (m *Migrator) Up() error {
-	configurations := m.Cli.Must(config.GetUserYAMLConfig(m.Env)).(*config.DatabaseConfig)
-
-	migrationsTableExists := m.Cli.Must(m.Connection.VerifyTableExists(configurations.MigrationsTableName)).(bool)
-
-	if !migrationsTableExists {
-		m.Cli.HandleError(m.Connection.CreateMigrationsTable())
-	}
-
-	if len(m.Migrations) == 0 {
-		fmt.Println("No migrations pending")
-		return nil
-	}
-
-	for _, migration := range m.Migrations {
-		readFile := m.Cli.Must(tools.ReadFile(migration.Path)).([]byte)
-
-		fmt.Printf("========= Migrating: %s =========\n", migration.Name)
-
-		m.Cli.HandleError(m.Connection.ExecMigrationFileContent(string(readFile), migration.Name, "up"))
-
-		fmt.Printf("========= Migrated: %s =========\n\n", migration.Name)
-	}
-	return nil
+type Column struct {
+	Type          string
+	PrimaryKey    bool
+	Unique        bool
+	AllowNull     bool
+	Autoincrement bool
+	Comment       string
+	DefaultValue  interface{}
 }
 
-func (m *Migrator) Down() error {
-	configurations := m.Cli.Must(config.GetUserYAMLConfig(m.Env)).(*config.DatabaseConfig)
+type Columns map[string]Column
 
-	migrationsTableExists := m.Cli.Must(m.Connection.VerifyTableExists(configurations.MigrationsTableName)).(bool)
+type Table struct {
+	Name    string
+	Columns Columns
+}
 
-	if !migrationsTableExists {
-		return errors.New("no migrations table exists")
-	}
+type ConstraintType string
 
-	if len(m.Migrations) == 0 {
-		fmt.Println("No migrations pending to be down")
-	}
+const (
+	N_NULL  ConstraintType = "NOT NULL"
+	UNIQUE  ConstraintType = "UNIQUE"
+	PRIMARY ConstraintType = "PRIMARY"
+	FOREIGN ConstraintType = "FOREIGN"
+	CHECK   ConstraintType = "CHECK"
+	DEFAULT ConstraintType = "DEFAULT"
+	INDEX   ConstraintType = "CREATE INDEX"
+)
 
-	for _, migration := range m.Migrations {
-		readFile := m.Cli.Must(tools.ReadFile(migration.Path)).([]byte)
+type ReferenceTable struct {
+	Table string
+	Field string
+}
 
-		fmt.Printf("========= Migrating Down: %s =========\n", migration.Name)
-
-		m.Cli.HandleError(m.Connection.ExecMigrationFileContent(string(readFile), migration.Name, "down"))
-
-		fmt.Printf("========= Migrated Down: %s =========\n\n", migration.Name)
-	}
-
-	return nil
+type Constraint struct {
+	Table      string
+	Type       ConstraintType
+	Name       string
+	References ReferenceTable
+	Fields     []string
+	EVAL       string
 }

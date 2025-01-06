@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/database"
-	"github.com/oswgg/migrator/internal/must"
+	"github.com/oswgg/migrator/internal/shared"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ var testConnectionCmd = &cobra.Command{
 	Short:   "Test connection",
 	Long:    "Test database connection with the preset config files",
 	Run: func(cmd *cobra.Command, args []string) {
-		cli := must.NewCliMust()
+		cli := shared.NewCliMust()
 
 		databaseCredentials := cli.Must(config.GetUserYAMLConfig(environment)).(*config.DatabaseConfig)
 

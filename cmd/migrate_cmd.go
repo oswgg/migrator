@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/oswgg/migrator/internal/database/migrations"
-	"github.com/oswgg/migrator/internal/must"
-	types "github.com/oswgg/migrator/internal/types"
+	"github.com/oswgg/migrator/internal/migrations"
+	"github.com/oswgg/migrator/internal/shared"
+	_ "github.com/oswgg/migrator/migrations/up"
 	"github.com/spf13/cobra"
 )
 
@@ -18,14 +18,14 @@ var migrateCmd = &cobra.Command{
 	Long:  `Run types.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		cli := must.NewCliMust()
+		cli := shared.NewCliMust()
 
 		var upDownFlag = args[0]
 		var upDownValue string
 
 		var isSpecific = false
 		var migrationName string
-		var migratorValues *types.Migrator
+		var migratorValues *migrations.MigratorExecutor
 
 		if specificMigration != "" {
 			isSpecific = true
@@ -39,22 +39,24 @@ var migrateCmd = &cobra.Command{
 		}
 
 		if isSpecific {
-			migratorValues = &types.Migrator{
+			migratorValues = &migrations.MigratorExecutor{
 				Specific:          isSpecific,
 				SpecificMigration: migrationName,
 				MigrationType:     upDownValue,
 				Env:               env,
+				Registry:          migrations.Registry,
 			}
 		} else {
-			migratorValues = &types.Migrator{
+			migratorValues = &migrations.MigratorExecutor{
 				From:          fromMigration,
 				To:            toMigration,
 				MigrationType: upDownValue,
 				Env:           env,
+				Registry:      migrations.Registry,
 			}
 		}
 
-		migrator := cli.Must(migrations.NewMigrator(migratorValues)).(types.MigrationRunner)
+		migrator := cli.Must(migrations.NewMigrator(*migratorValues)).(migrations.MigratorExecutor)
 
 		if upDownValue == "up" {
 			cli.HandleError(migrator.Up())

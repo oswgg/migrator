@@ -5,7 +5,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/oswgg/migrator/internal/config"
-	"github.com/oswgg/migrator/internal/must"
+	"github.com/oswgg/migrator/internal/shared"
 	"log"
 	"time"
 )
@@ -13,7 +13,7 @@ import (
 type Database struct {
 	config.DatabaseConfig
 	connection *sql.DB
-	cli        *must.CliMust
+	cli        *shared.CliMust
 }
 
 type DatabaseImpl interface {
@@ -24,10 +24,11 @@ type DatabaseImpl interface {
 	ExecMigrationFileContent(fileContent string, migrationName string, upOrDown string) error
 	GetExecutedMigrations() *[]string
 	RegisterExecutedMigration(migrationName string) error
+	RemoveExecutedMigration(migrationName string) error
 }
 
 func NewDatabaseImpl(credentials *config.DatabaseConfig) (DatabaseImpl, error) {
-	cli := must.NewCliMust()
+	cli := shared.NewCliMust()
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", credentials.Username, credentials.Password, credentials.Host, credentials.Database)
 
 	connection := cli.Must(sql.Open("mysql", dsn)).(*sql.DB)
@@ -99,12 +100,6 @@ func (d *Database) ExecMigrationFileContent(fileContent string, migrationName st
 	_, err := d.connection.Exec(fileContent)
 	if err != nil {
 		return err
-	}
-
-	if upOrDown == "up" {
-		d.cli.HandleError(d.RegisterExecutedMigration(migrationName))
-	} else {
-		d.cli.HandleError(d.RemoveExecutedMigration(migrationName))
 	}
 
 	return nil
