@@ -9,7 +9,6 @@ import (
 var specificMigration string
 var fromMigration string
 var toMigration string
-var env string
 
 var migrateCmd = &cobra.Command{
 	Use:   "migrate [up|down]",
@@ -42,7 +41,7 @@ var migrateCmd = &cobra.Command{
 				Specific:          isSpecific,
 				SpecificMigration: migrationName,
 				MigrationType:     upDownValue,
-				Env:               env,
+				Env:               shared.GlobalEnv,
 				Registry:          migrations.Registry,
 			}
 		} else {
@@ -50,7 +49,7 @@ var migrateCmd = &cobra.Command{
 				From:          fromMigration,
 				To:            toMigration,
 				MigrationType: upDownValue,
-				Env:           env,
+				Env:           shared.GlobalEnv,
 				Registry:      migrations.Registry,
 			}
 		}
@@ -69,6 +68,6 @@ func init() {
 	migrateCmd.Flags().StringVarP(&specificMigration, "name", "n", "", "Run specific migration")
 	migrateCmd.Flags().StringVarP(&fromMigration, "from", "f", "", "Run from migration")
 	migrateCmd.Flags().StringVarP(&toMigration, "to", "t", "", "Run to migration")
-	migrateCmd.Flags().StringVarP(&env, "env", "e", "dev", "Run on environment")
+	migrateCmd.Flags().StringVarP(&shared.GlobalEnv, "env", "e", "dev", "Run on environment")
 	migratorCmd.AddCommand(migrateCmd)
 }
