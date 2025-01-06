@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/shared"
-	"github.com/oswgg/migrator/pkg/tools"
+	"github.com/oswgg/migrator/internal/utils"
 	"gopkg.in/yaml.v3"
 	"path"
 	"strings"
@@ -36,7 +36,7 @@ type UserYAMLConfig struct {
 }
 
 func GetUserTxTConfig() (*UserMigratorRCConfig, error) {
-	txtValues, err := tools.GetTxtValues(MigratorRCFileName)
+	txtValues, err := utils.GetTxtValues(MigratorRCFileName)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func GetUserYAMLConfig(env string) (*DatabaseConfig, error) {
 
 	userConfig := UserYAMLConfig{}
 
-	yamlContent := cli.Must(tools.ReadFile(path.Join(userTxtConfigs.ConfigFolderPath, ConfigYamlFileName))).([]byte)
+	yamlContent := cli.Must(utils.ReadFile(path.Join(userTxtConfigs.ConfigFolderPath, ConfigYamlFileName))).([]byte)
 
 	cli.HandleError(yaml.Unmarshal(yamlContent, &userConfig))
 
@@ -91,7 +91,7 @@ func GetUserYAMLConfig(env string) (*DatabaseConfig, error) {
 			*field.dest = field.src
 			continue
 		}
-		if *field.dest, err = tools.ExpandEnvVar(field.src); err != nil {
+		if *field.dest, err = utils.ExpandEnvVar(field.src); err != nil {
 			return nil, fmt.Errorf("failed to expand environment variable: %w", err)
 		}
 	}

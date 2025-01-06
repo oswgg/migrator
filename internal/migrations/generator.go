@@ -3,7 +3,7 @@ package migrations
 import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/config"
-	"github.com/oswgg/migrator/pkg/tools"
+	"github.com/oswgg/migrator/internal/utils"
 	"os"
 	"path/filepath"
 	"time"
@@ -34,7 +34,7 @@ func NewFileGenerator(migrationsDir string) MigratorGenerator {
 
 func (f *FileGenerator) CreateMigration(name string, description string) (string, error) {
 	for _, dir := range []string{f.MigrationsDir, f.UpMigrationsDir} {
-		if !tools.FileExists(dir) {
+		if !utils.FileExists(dir) {
 			if err := os.MkdirAll(dir, config.DirPerm); err != nil {
 				return "", fmt.Errorf("failed To create directory %s: %w", dir, err)
 			}
@@ -52,7 +52,7 @@ func (f *FileGenerator) CreateMigration(name string, description string) (string
 	//downChan := make(chan FileResult)
 
 	go func() {
-		err := tools.CreateAndWriteFile(upMigrationPath, upMigrationTemplate, config.FilePerm)
+		err := utils.CreateAndWriteFile(upMigrationPath, upMigrationTemplate, config.FilePerm)
 		upChan <- FileResult{Path: upMigrationPath, Err: err}
 	}()
 	//
@@ -83,15 +83,15 @@ func getTemplateMigration(name string, desc string, migrationType string) string
 // Up %v
 
 import (
-	"github.com/oswgg/migrator/internal/migrations"
-	"github.com/oswgg/migrator/internal/types"
+	"github.com/oswgg/user_migrations/internal/user_migrations"
+	"github.com/oswgg/user_migrations/internal/types"
 )
 
 // Up
-var queryMigrator = migrations.NewQueryMigrator()
+var queryMigrator = user_migrations.NewQueryMigrator()
 
 func init() {
-	migrations.Registry.Register("%v", &types.Migration{
+	user_migrations.Registry.Register("%v", &types.Migration{
 		Up:   []*types.Operation{},
 		Down: []*types.Operation{},
 	})

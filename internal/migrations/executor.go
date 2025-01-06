@@ -70,7 +70,7 @@ func (m *MigratorExecutor) Down() error {
 	migrationsTableExists := m.Cli.Must(m.Connection.VerifyTableExists(configurations.MigrationsTableName)).(bool)
 
 	if !migrationsTableExists {
-		return errors.New("no migrations table exists")
+		return errors.New("no user_migrations table exists")
 	}
 
 	for _, migration := range m.Registry.GetAllMigrations() {

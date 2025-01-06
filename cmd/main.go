@@ -8,7 +8,7 @@ import (
 
 var migratorCmd = &cobra.Command{
 	Use:   "types [command]",
-	Short: "Migrator its a simple CLI to run your migrations",
+	Short: "Migrator its a simple CLI to run your user_migrations",
 	Long:  "Migrator its a simple CLI to run your sql files and migrate your database...",
 }
 

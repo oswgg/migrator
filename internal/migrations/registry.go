@@ -1,7 +1,7 @@
 package migrations
 
 import (
-	"github.com/oswgg/migrator/internal/types"
+	"github.com/oswgg/migrator/pkg/types"
 	"sort"
 )
 

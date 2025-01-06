@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/shared"
-	"github.com/oswgg/migrator/pkg/tools"
+	"github.com/oswgg/migrator/internal/utils"
 	"os"
 	"path/filepath"
 )
@@ -24,17 +24,17 @@ func InitializeConfigurationFiles() error {
 	cli := shared.NewCliMust()
 	var err error
 	// Verify .migratorrc exists
-	if tools.FileExists(MigratorRCFileName) {
+	if utils.FileExists(MigratorRCFileName) {
 		return fmt.Errorf("%s already exists", MigratorRCFileName)
 	}
 
 	// Create .migratorrc
-	if err = tools.CreateAndWriteFile(MigratorRCFileName, configTemplates[MigratorRCFileName], FilePerm); err != nil {
+	if err = utils.CreateAndWriteFile(MigratorRCFileName, configTemplates[MigratorRCFileName], FilePerm); err != nil {
 		return fmt.Errorf("error writing %s file: %w", MigratorRCFileName, err)
 	}
 
 	// Get values of .migratorrc
-	migratorConfigValues, err := tools.GetTxtValues(MigratorRCFileName)
+	migratorConfigValues, err := utils.GetTxtValues(MigratorRCFileName)
 	if err != nil {
 		return fmt.Errorf("error getting %s values: %w", MigratorRCFileName, err)
 	}
@@ -48,7 +48,7 @@ func InitializeConfigurationFiles() error {
 
 	// Verifica si config.yaml ya existe
 	configYamlPath := filepath.Join(configFolderPath, ConfigYamlFileName)
-	if tools.FileExists(configYamlPath) {
+	if utils.FileExists(configYamlPath) {
 		return fmt.Errorf("%s already exists", ConfigYamlFileName)
 	}
 
@@ -59,7 +59,7 @@ func InitializeConfigurationFiles() error {
 		}
 
 		filePath := filepath.Join(configFolderPath, filename)
-		cli.MustWithMessage("", tools.CreateAndWriteFile(filePath, template, FilePerm), fmt.Sprintf("error writing %s file: %v", template, err))
+		cli.MustWithMessage("", utils.CreateAndWriteFile(filePath, template, FilePerm), fmt.Sprintf("error writing %s file: %v", template, err))
 	}
 
 	return nil

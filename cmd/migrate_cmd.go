@@ -3,7 +3,6 @@ package cmd
 import (
 	"github.com/oswgg/migrator/internal/migrations"
 	"github.com/oswgg/migrator/internal/shared"
-	_ "github.com/oswgg/migrator/migrations/up"
 	"github.com/spf13/cobra"
 )
 
