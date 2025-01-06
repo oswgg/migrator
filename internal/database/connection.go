@@ -106,7 +106,7 @@ func (d *Database) ExecMigrationFileContent(fileContent string, migrationName st
 }
 
 func (d *Database) GetExecutedMigrations() *[]string {
-	rows, err := d.connection.Query("SELECT name FROM migrations")
+	rows, err := d.connection.Query("SELECT name FROM user_migrations")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func (d *Database) GetExecutedMigrations() *[]string {
 }
 
 func (d *Database) RegisterExecutedMigration(migrationName string) error {
-	_, err := d.connection.Exec("INSERT INTO migrations (name, runAt) VALUES (?, ?)", migrationName, time.Now())
+	_, err := d.connection.Exec("INSERT INTO user_migrations (name, runAt) VALUES (?, ?)", migrationName, time.Now())
 	if err != nil {
 		return err
 	}

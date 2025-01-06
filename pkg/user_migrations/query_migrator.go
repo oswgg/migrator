@@ -1,13 +1,14 @@
-package migrations
+package user_migrations
 
 import (
 	"github.com/oswgg/migrator/internal/config"
+	"github.com/oswgg/migrator/internal/migrations"
 	"github.com/oswgg/migrator/internal/shared"
-	"github.com/oswgg/migrator/internal/types"
+	"github.com/oswgg/migrator/pkg/types"
 )
 
 type QueryMigrator struct {
-	transpiler     *SQLTranspiler
+	transpiler     *migrations.SQLTranspiler
 	cli            *shared.CliMust
 	upOperations   []*types.Operation
 	downOperations []*types.Operation
@@ -29,7 +30,7 @@ func NewQueryMigrator() MigratorInterpreter {
 	databaseConfig := cli.Must(config.GetUserYAMLConfig("dev")).(*config.DatabaseConfig)
 
 	return &QueryMigrator{
-		transpiler: NewSQLTranspiler(databaseConfig.Dialect),
+		transpiler: migrations.NewSQLTranspiler(databaseConfig.Dialect),
 		cli:        cli,
 	}
 }

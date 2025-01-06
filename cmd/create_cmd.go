@@ -5,7 +5,7 @@ import (
 	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/migrations"
 	"github.com/oswgg/migrator/internal/shared"
-	"github.com/oswgg/migrator/pkg/tools"
+	"github.com/oswgg/migrator/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -22,7 +22,7 @@ var createCmd = &cobra.Command{
 
 		name := args[0]
 
-		userTxtConfigs := cli.Must(tools.GetTxtValues(config.MigratorRCFileName)).(map[string]string)
+		userTxtConfigs := cli.Must(utils.GetTxtValues(config.MigratorRCFileName)).(map[string]string)
 
 		migrationsFolderPath := userTxtConfigs["migrations_folder_path"]
 

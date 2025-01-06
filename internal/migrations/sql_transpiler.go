@@ -3,7 +3,7 @@ package migrations
 import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/shared"
-	"github.com/oswgg/migrator/internal/types"
+	"github.com/oswgg/migrator/pkg/types"
 	"strings"
 )
 
