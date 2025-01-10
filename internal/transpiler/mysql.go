@@ -1,26 +1,25 @@
-package migrations
+package transpiler
 
 import (
 	"fmt"
 	"github.com/oswgg/migrator/internal/shared"
-	"github.com/oswgg/migrator/internal/types"
+	"github.com/oswgg/migrator/pkg/types"
 	"strings"
 )
 
-type SQLTranspiler struct {
+type MySQLTranspiler struct {
 	Dialect string
 	cli     *shared.CliMust
 }
 
-func NewSQLTranspiler(dialect string) *SQLTranspiler {
-
-	return &SQLTranspiler{
-		Dialect: dialect,
+func NewMySQLTranspiler() RealTranspiler {
+	return &MySQLTranspiler{
+		Dialect: "mysql",
 		cli:     shared.NewCliMust(),
 	}
 }
 
-func (t *SQLTranspiler) TranspileTable(table *types.Table) *types.Operation {
+func (t *MySQLTranspiler) TranspileTable(table *types.Table) *types.Operation {
 	var strBuilder strings.Builder
 
 	strBuilder.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %v (", table.Name))
@@ -30,7 +29,7 @@ func (t *SQLTranspiler) TranspileTable(table *types.Table) *types.Operation {
 
 	for name, value := range table.Columns {
 		strBuilder.WriteString(fmt.Sprintf("\n\t%v", name))
-		strBuilder.WriteString(fmt.Sprintf("%v ", t.TranspileColumn(&value)))
+		strBuilder.WriteString(fmt.Sprintf("%v ", *t.TranspileColumn(&value)))
 		count++
 		if count != totalColumns {
 			strBuilder.WriteString(",")
@@ -44,14 +43,14 @@ func (t *SQLTranspiler) TranspileTable(table *types.Table) *types.Operation {
 	return &operation
 }
 
-func (t *SQLTranspiler) DropTable(tableName string) *types.Operation {
+func (t *MySQLTranspiler) DropTable(tableName string) *types.Operation {
 	var strBuilder strings.Builder
 	strBuilder.WriteString(fmt.Sprintf("DROP TABLE IF EXISTS %v;", tableName))
 	operation := types.Operation(strBuilder.String())
 	return &operation
 }
 
-func (t *SQLTranspiler) TranspileColumn(column *types.Column) string {
+func (t *MySQLTranspiler) TranspileColumn(column *types.Column) *types.Operation {
 	var str strings.Builder
 
 	str.WriteString(fmt.Sprintf(" %v", column.Type))
@@ -72,10 +71,11 @@ func (t *SQLTranspiler) TranspileColumn(column *types.Column) string {
 		str.WriteString(fmt.Sprintf(" DEFAULT %v", column.DefaultValue))
 	}
 
-	return str.String()
+	op := types.Operation(str.String())
+	return &op
 }
 
-func (t *SQLTranspiler) TranspileConstraint(constraint *types.Constraint) *types.Operation {
+func (t *MySQLTranspiler) TranspileConstraint(constraint *types.Constraint) *types.Operation {
 	var str strings.Builder
 
 	if constraint.Table == "" {
