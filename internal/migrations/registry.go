@@ -1,14 +1,15 @@
 package migrations
 
 import (
+	"fmt"
 	"github.com/oswgg/migrator/pkg/types"
 	"sort"
 )
 
 type MigrationEntry struct {
 	Name string
-	Up   []*types.Operation
-	Down []*types.Operation
+	Up   []types.MigrationOperation
+	Down []types.MigrationOperation
 }
 
 type MigrationRegistry struct {
@@ -28,6 +29,7 @@ func (r *MigrationRegistry) Register(name string, migration *types.Migration) {
 }
 
 func (r *MigrationRegistry) GetAllMigrations() []MigrationEntry {
+	fmt.Println(r.migrations)
 	entries := make([]MigrationEntry, 0, len(r.migrations))
 	for _, entry := range r.migrations {
 		entries = append(entries, entry)

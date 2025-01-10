@@ -12,7 +12,7 @@ type MySQLTranspiler struct {
 	cli     *shared.CliMust
 }
 
-func NewMySQLTranspiler() Transpiler {
+func NewMySQLTranspiler() RealTranspiler {
 	return &MySQLTranspiler{
 		Dialect: "mysql",
 		cli:     shared.NewCliMust(),
@@ -29,7 +29,7 @@ func (t *MySQLTranspiler) TranspileTable(table *types.Table) *types.Operation {
 
 	for name, value := range table.Columns {
 		strBuilder.WriteString(fmt.Sprintf("\n\t%v", name))
-		strBuilder.WriteString(fmt.Sprintf("%v ", t.TranspileColumn(&value)))
+		strBuilder.WriteString(fmt.Sprintf("%v ", *t.TranspileColumn(&value)))
 		count++
 		if count != totalColumns {
 			strBuilder.WriteString(",")
@@ -50,7 +50,7 @@ func (t *MySQLTranspiler) DropTable(tableName string) *types.Operation {
 	return &operation
 }
 
-func (t *MySQLTranspiler) TranspileColumn(column *types.Column) string {
+func (t *MySQLTranspiler) TranspileColumn(column *types.Column) *types.Operation {
 	var str strings.Builder
 
 	str.WriteString(fmt.Sprintf(" %v", column.Type))
@@ -71,7 +71,8 @@ func (t *MySQLTranspiler) TranspileColumn(column *types.Column) string {
 		str.WriteString(fmt.Sprintf(" DEFAULT %v", column.DefaultValue))
 	}
 
-	return str.String()
+	op := types.Operation(str.String())
+	return &op
 }
 
 func (t *MySQLTranspiler) TranspileConstraint(constraint *types.Constraint) *types.Operation {

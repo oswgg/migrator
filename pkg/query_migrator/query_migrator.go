@@ -1,14 +1,13 @@
 package user_migrations
 
 import (
-	"github.com/oswgg/migrator/internal/config"
 	"github.com/oswgg/migrator/internal/shared"
 	"github.com/oswgg/migrator/internal/transpiler"
 	"github.com/oswgg/migrator/pkg/types"
 )
 
 type QueryMigrator struct {
-	transpiler     transpiler.Transpiler
+	transpiler     transpiler.MockTranspiler
 	cli            *shared.CliMust
 	upOperations   []*types.Operation
 	downOperations []*types.Operation
@@ -16,18 +15,17 @@ type QueryMigrator struct {
 
 type MigratorInterpreter interface {
 	// Tables
-	CreateTable(table *types.Table) *types.Operation
-	DropTable(tableName string) *types.Operation
+	CreateTable(table *types.Table) interface{}
+	DropTable(tableName string) interface{}
 
 	// Constraints
-	AddConstraint(constraint *types.Constraint) *types.Operation
+	AddConstraint(constraint *types.Constraint) interface{}
 }
 
 func NewQueryMigrator() MigratorInterpreter {
 	cli := shared.NewCliMust()
 
-	databaseConfig := cli.Must(config.GetUserYAMLConfig(shared.GlobalEnv)).(*config.DatabaseConfig)
-	transpiler := transpiler.NewTranspiler(databaseConfig.Dialect)
+	transpiler := transpiler.NewTranspiler("")
 
 	return &QueryMigrator{
 		transpiler: transpiler,
@@ -35,14 +33,14 @@ func NewQueryMigrator() MigratorInterpreter {
 	}
 }
 
-func (m *QueryMigrator) CreateTable(table *types.Table) *types.Operation {
+func (m *QueryMigrator) CreateTable(table *types.Table) interface{} {
 	return m.transpiler.TranspileTable(table)
 }
 
-func (m *QueryMigrator) DropTable(tableName string) *types.Operation {
+func (m *QueryMigrator) DropTable(tableName string) interface{} {
 	return m.transpiler.DropTable(tableName)
 }
 
-func (m *QueryMigrator) AddConstraint(constraint *types.Constraint) *types.Operation {
+func (m *QueryMigrator) AddConstraint(constraint *types.Constraint) interface{} {
 	return m.transpiler.TranspileConstraint(constraint)
 }

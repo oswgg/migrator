@@ -83,15 +83,16 @@ func getTemplateMigration(name string, desc string, migrationType string) string
 // Up %v
 
 import (
-	"github.com/oswgg/user_migrations/internal/user_migrations"
-	"github.com/oswgg/user_migrations/internal/types"
+	"github.com/oswgg/migrator/pkg/query_migrator"
+	"github.com/oswgg/migrator/pkg/registry"
+	"github.com/oswgg/migrator/pkg/types"
 )
 
 // Up
 var queryMigrator = user_migrations.NewQueryMigrator()
 
 func init() {
-	user_migrations.Registry.Register("%v", &types.Migration{
+	registry.Register("%v", &types.Migration{
 		Up:   []*types.Operation{},
 		Down: []*types.Operation{},
 	})

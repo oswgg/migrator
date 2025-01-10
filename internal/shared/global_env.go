@@ -1,7 +1,7 @@
 package shared
 
-var GlobalEnv string
-
-func GetGlobalEnv() string {
-	return GlobalEnv
+type Config struct {
+	Environment string
 }
+
+var GlobalConfig Config

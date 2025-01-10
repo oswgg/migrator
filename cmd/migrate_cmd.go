@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/oswgg/migrator/internal/migrations"
 	"github.com/oswgg/migrator/internal/shared"
+	_ "github.com/oswgg/migrator/migrations/up"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +42,7 @@ var migrateCmd = &cobra.Command{
 				Specific:          isSpecific,
 				SpecificMigration: migrationName,
 				MigrationType:     upDownValue,
-				Env:               shared.GlobalEnv,
+				Env:               shared.GlobalConfig.Environment,
 				Registry:          migrations.Registry,
 			}
 		} else {
@@ -49,7 +50,7 @@ var migrateCmd = &cobra.Command{
 				From:          fromMigration,
 				To:            toMigration,
 				MigrationType: upDownValue,
-				Env:           shared.GlobalEnv,
+				Env:           shared.GlobalConfig.Environment,
 				Registry:      migrations.Registry,
 			}
 		}
@@ -68,6 +69,5 @@ func init() {
 	migrateCmd.Flags().StringVarP(&specificMigration, "name", "n", "", "Run specific migration")
 	migrateCmd.Flags().StringVarP(&fromMigration, "from", "f", "", "Run from migration")
 	migrateCmd.Flags().StringVarP(&toMigration, "to", "t", "", "Run to migration")
-	migrateCmd.Flags().StringVarP(&shared.GlobalEnv, "env", "e", "dev", "Run on environment")
 	migratorCmd.AddCommand(migrateCmd)
 }

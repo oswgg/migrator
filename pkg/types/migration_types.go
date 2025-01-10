@@ -1,6 +1,8 @@
 package types
 
 type Operation string
+type MigrationOperation interface{}
+type FuncOperation func(dialect string) *Operation
 
 type MigrationFile struct {
 	Path string
@@ -8,8 +10,8 @@ type MigrationFile struct {
 }
 
 type Migration struct {
-	Up   []*Operation
-	Down []*Operation
+	Up   []MigrationOperation
+	Down []MigrationOperation
 }
 
 type Column struct {
